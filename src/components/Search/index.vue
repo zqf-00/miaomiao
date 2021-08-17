@@ -3,28 +3,19 @@
     <div class="search_input">
       <div class="search_input_wrapper">
         <i class="iconfont icon-sousuo"></i>
-        <input type="text" />
+        <input type="text" v-model="message" />
       </div>
     </div>
     <div class="search_result">
       <h3>电影/电视剧/综艺</h3>
       <ul>
-        <li>
-          <div class="img"><img src="/images/movie_1.jpg" /></div>
+        <li v-for="item in moviesList" :key="item.id">
+          <div class="img"><img :src="item.img" /></div>
           <div class="info">
-            <p><span>无名之辈</span><span>8.5</span></p>
-            <p>A Cool Fish</p>
-            <p>剧情,喜剧,犯罪</p>
-            <p>2018-11-16</p>
-          </div>
-        </li>
-        <li>
-          <div class="img"><img src="/images/movie_1.jpg" /></div>
-          <div class="info">
-            <p><span>无名之辈</span><span>8.5</span></p>
-            <p>A Cool Fish</p>
-            <p>剧情,喜剧,犯罪</p>
-            <p>2018-11-16</p>
+            <p><span>{{item.nm}}</span><span>{{item.sc}}</span></p>
+            <p>{{item.act}}</p>
+            <p>{{item.cat}}</p>
+            <p>{{item.pubDesc}}</p>
           </div>
         </li>
       </ul>
@@ -35,7 +26,65 @@
 <script>
 export default {
   name: "Search",
-};
+  data() {
+    return {
+      message: '',
+      moviesList: []
+    }
+  },
+
+  watch: {
+    message(newVal){
+      // console.log(this.show());
+      // clearTimeout()
+      // setTimeout 确保快速输入时最后一个再触发事件
+      // console.log(newVal);
+      var that=this
+
+      this.cancelRequest()
+      // console.log(this.cancelRequest());
+      this.$http.get('/search?&cityId=20&stype=-1&kw='+newVal,{
+        cancelToken: new this.$http.CancelToken(function executor(c) {
+          that.source = c;
+        })
+      }).then((res) => {
+        console.log(res);
+        var msg = res.statusText
+            if(msg === 'OK'){
+                this.changeimage(res)
+                this.moviesList=res.data.movies.list
+                // console.log(this.movieList)
+            }else{
+                console.log('没有获取到信息')
+            }
+      }).catch((err) => {
+          if (this.$http.isCancel(err)) {
+              console.log('Rquest canceled', err.message); //请求如果被取消，这里是返回取消的message
+          } else {
+              //handle error
+              console.log(err);
+          }
+      })
+    }
+  },
+  methods: {
+    cancelRequest(){
+      if(typeof this.source ==='function'){
+          this.source('终止请求')
+      }
+    },
+    // w.h转换
+    changeimage(res){
+      var str=res.data.movies.list
+      console.log(str.length)
+      for(var i=0;i<str.length;i++){
+        // console.log(str[i].img);
+        str[i].img=str[i].img.replace(/w.h/,"170.230")
+      }
+      // console.log(str)
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -100,6 +149,9 @@ export default {
   display: flex;
   line-height: 22px;
   font-size: 12px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  /* white-space: nowrap; */
 }
 .search_body .search_result .info p:nth-of-type(1) span:nth-of-type(1) {
   font-size: 18px;
