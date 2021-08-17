@@ -1,17 +1,10 @@
 <template>
     <div class="city_body">
-        <div class="city_list">
+        <!-- <div class="city_list">
             <div class="city_hot">
                 <h2>热门城市</h2>
                 <ul class="clearfix">
                     <li>上海</li>
-                    <li>北京</li>
-                    <li>上海</li>
-                    <li>北京</li>
-                    <li>上海</li>
-                    <li>北京</li>
-                    <li>上海</li>
-                    <li>北京</li>
                 </ul>
             </div>
             <div class="city_sort">
@@ -24,51 +17,6 @@
                         <li>安阳</li>
                     </ul>
                 </div>
-                <div>
-                    <h2>B</h2>
-                    <ul>
-                        <li>北京</li>
-                        <li>保定</li>
-                        <li>蚌埠</li>
-                        <li>包头</li>
-                    </ul>
-                </div>
-                <div>
-                    <h2>A</h2>
-                    <ul>
-                        <li>阿拉善盟</li>
-                        <li>鞍山</li>
-                        <li>安庆</li>
-                        <li>安阳</li>
-                    </ul>
-                </div>
-                <div>
-                    <h2>B</h2>
-                    <ul>
-                        <li>北京</li>
-                        <li>保定</li>
-                        <li>蚌埠</li>
-                        <li>包头</li>
-                    </ul>
-                </div>
-                <div>
-                    <h2>A</h2>
-                    <ul>
-                        <li>阿拉善盟</li>
-                        <li>鞍山</li>
-                        <li>安庆</li>
-                        <li>安阳</li>
-                    </ul>
-                </div>
-                <div>
-                    <h2>B</h2>
-                    <ul>
-                        <li>北京</li>
-                        <li>保定</li>
-                        <li>蚌埠</li>
-                        <li>包头</li>
-                    </ul>
-                </div>	
             </div>
         </div>
         <div class="city_index">
@@ -79,6 +27,27 @@
                 <li>D</li>
                 <li>E</li>
             </ul>
+        </div> -->
+        <div class="city_list">
+          <div class="city_hot">
+                <h2>热门城市</h2>
+                <ul class="clearfix">
+                    <li>上海</li>
+                </ul>
+            </div>
+            <div class="city_sort" ref="city_sort">
+                <div v-for="(value,key,i) in citesList.letterMap" :key="i">
+                    <h2>{{key}}</h2>
+                    <ul>
+                        <li v-for="itemList in value" :key="itemList.id">{{itemList.nm}}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="city_index">
+          <ul>
+              <li v-for="(value,key,i) in citesList.letterMap" :key="i" @touchstart="handleToIndex(i)">{{key}}</li>
+          </ul>
         </div>
     </div>
 </template>
@@ -86,12 +55,41 @@
 <script>
 export default {
   name: "City",
+  data () {
+    return {
+      citesList: []
+    }
+  },
+  mounted() {
+    this.$http.get('/data/city.json').then((res) => {
+      // console.log(res)
+      var msg = res.statusText
+      if(msg === 'OK'){
+        var cities = res.data
+        // console.log(cities)
+        this.citesList=cities
+        // console.log(this.citesList)
+      }else{
+        console.log('没有获取到城市信息')
+      }
+    })
+  },
+  methods: {
+    // 定位A,B,C。。。
+    handleToIndex(index){
+      var h2 = this.$refs.city_sort.getElementsByTagName('h2')
+      // console.log(h2[index].offsetTop,this.$refs.city_sort.parentNode.scrollTop)
+      this.$refs.city_sort.parentNode.scrollTop=h2[index].offsetTop
+      // console.log(h2[index].offsetTop,this.$refs.city_sort.parentNode.scrollTop)
+    }
+  }
 };
 </script>
 
 <style scoped>
 #content .city_body {
   margin-top: 97px;
+  margin-bottom: 50px;
   display: flex;
   width: 100%;
   position: absolute;
